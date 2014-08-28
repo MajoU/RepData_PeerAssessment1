@@ -5,8 +5,9 @@
 
 ```r
 library(plyr)
+library(data.table)
 library(lubridate)
-data <- read.csv("activity.csv")
+data <- fread("activity.csv", colClasses=c("numeric","factor","integer"))
 data$date <- ymd(data$date)
 ```
 ## What is mean total number of steps taken per day?
@@ -37,19 +38,32 @@ median(total_steps, na.rm = T)
 ## What is the average daily activity pattern?
 
 ```r
-inter_steps <- ddply(data, .(interval), summarize, avg = mean(steps, na.rm = T))
-plot(inter_steps$avg ~ inter_steps$interval, type = "l", xlab = "Intervals", ylab = "Average number of steps")
+head(data[, avg := mean(steps, na.rm = T), by = interval], 5)
+```
+
+```
+##    steps       date interval     avg
+## 1:    NA 2012-10-01        0 1.71698
+## 2:    NA 2012-10-01        5 0.33962
+## 3:    NA 2012-10-01       10 0.13208
+## 4:    NA 2012-10-01       15 0.15094
+## 5:    NA 2012-10-01       20 0.07547
+```
+
+```r
+plot(avg ~ interval, data, type = "l", xlab = "Intervals", ylab = "Average number of steps")
 ```
 
 ![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
 
 ```r
 # Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-inter_steps$interval[which.max(inter_steps$avg)]
+arrange(data[ ,avg,interval], desc(avg))[1]
 ```
 
 ```
-## [1] 835
+##    interval   avg
+## 1:      835 206.2
 ```
 ## Imputing missing values
 
@@ -64,18 +78,20 @@ sum(is.na(data))
 
 ```r
 # Imputing NA's with average on 5-min interval and create new dataset
-NA_values <- which(is.na(data$steps))
-new_data <- join(data, inter_steps)
+head(data[is.na(steps), steps := avg], 5)
 ```
 
 ```
-## Joining by: interval
+##      steps       date interval     avg
+## 1: 1.71698 2012-10-01        0 1.71698
+## 2: 0.33962 2012-10-01        5 0.33962
+## 3: 0.13208 2012-10-01       10 0.13208
+## 4: 0.15094 2012-10-01       15 0.15094
+## 5: 0.07547 2012-10-01       20 0.07547
 ```
 
 ```r
-new_data$steps[NA_values] <- new_data$avg[NA_values]
-daily_steps <- tapply(new_data$steps, new_data$date, sum)
-
+daily_steps <- tapply(data$steps, data$date, sum)
 # plot the histogram
 hist(daily_steps, xlab = "Total steps per day", main = "Histogram of the total number of steps per day")
 ```
@@ -123,12 +139,45 @@ Imputation change the apperance of histogram. The intervals between
 
 ```r
 library(lattice)
+# change local time
+Sys.setlocale("LC_TIME", "C")
+```
+
+```
+## [1] "C"
+```
+
+```r
 # change date to weekdays
-new_data$date <- wday(new_data$date, label = T)
+head(data[, date := weekdays(date, abbreviate = T)], 5)
+```
+
+```
+##      steps date interval     avg
+## 1: 1.71698  Mon        0 1.71698
+## 2: 0.33962  Mon        5 0.33962
+## 3: 0.13208  Mon       10 0.13208
+## 4: 0.15094  Mon       15 0.15094
+## 5: 0.07547  Mon       20 0.07547
+```
+
+```r
 # create string column week with two variable "weekend" and "weekday" by ifelse condition
-new_data$week<- ifelse(new_data$date %in% c("Sat", "Sun"), "weekend", "weekday")
-week_avg <- ddply(new_data, .(interval, week), summarize, steps = mean(steps))
-xyplot(steps ~ interval | week, data = week_avg, layout = c(1, 2), type = "l")
+head(data[, date := ifelse(date %in% c("Sat", "Sun"), "WeekEnd", "WeekDay")], 5)
+```
+
+```
+##      steps    date interval     avg
+## 1: 1.71698 WeekDay        0 1.71698
+## 2: 0.33962 WeekDay        5 0.33962
+## 3: 0.13208 WeekDay       10 0.13208
+## 4: 0.15094 WeekDay       15 0.15094
+## 5: 0.07547 WeekDay       20 0.07547
+```
+
+```r
+week <- ddply(data, .(interval, date), summarize, steps = mean(steps))
+xyplot(steps ~ interval | date, week, layout = c(1, 2), type = "l")
 ```
 
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
