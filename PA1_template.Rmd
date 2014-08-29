@@ -3,8 +3,8 @@
 
 ## Loading and preprocessing the data
 ```{r}
-library(plyr)
 library(data.table)
+library(plyr)
 library(lubridate)
 data <- fread("activity.csv", colClasses=c("numeric","factor","integer"))
 data$date <- ymd(data$date)
@@ -59,13 +59,10 @@ head(data[, date := weekdays(date, abbreviate = T)], 5)
 # create string column week with two variable "weekend" and "weekday" by ifelse condition
 head(data[, date := ifelse(date %in% c("Sat", "Sun"), "WeekEnd", "WeekDay")], 5)
 week <- data[, list(steps = mean(steps)), by = c("interval", "date")]
+#  ALTERNATIVE
+# week <- ddply(data, .(interval, date), summarize, steps = mean(steps))
 xyplot(steps ~ interval | date, week, layout = c(1, 2), type = "l")
 
-#--------------------------------------------------------------
 
-#  ALTERNATIVE
 
-# week <- ddply(data, .(interval, date), summarize, steps = mean(steps))
-
-#--------------------------------------------------------------
 ```

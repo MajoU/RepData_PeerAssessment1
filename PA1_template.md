@@ -4,8 +4,8 @@
 ## Loading and preprocessing the data
 
 ```r
-library(plyr)
 library(data.table)
+library(plyr)
 library(lubridate)
 data <- fread("activity.csv", colClasses=c("numeric","factor","integer"))
 data$date <- ymd(data$date)
@@ -58,7 +58,7 @@ plot(avg ~ interval, data, type = "l", xlab = "Intervals", ylab = "Average numbe
 
 ```r
 # Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-arrange(data[ ,avg,interval], desc(avg))[1]
+arrange(data[ ,avg, interval], desc(avg))[1]
 ```
 
 ```
@@ -176,7 +176,9 @@ head(data[, date := ifelse(date %in% c("Sat", "Sun"), "WeekEnd", "WeekDay")], 5)
 ```
 
 ```r
-week <- ddply(data, .(interval, date), summarize, steps = mean(steps))
+week <- data[, list(steps = mean(steps)), by = c("interval", "date")]
+#  ALTERNATIVE
+# week <- ddply(data, .(interval, date), summarize, steps = mean(steps))
 xyplot(steps ~ interval | date, week, layout = c(1, 2), type = "l")
 ```
 
