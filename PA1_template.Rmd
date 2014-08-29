@@ -24,7 +24,7 @@ head(data[, avg := mean(steps, na.rm = T), by = interval], 5)
 plot(avg ~ interval, data, type = "l", xlab = "Intervals", ylab = "Average number of steps")
 
 # Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-arrange(data[ ,avg,interval], desc(avg))[1]
+arrange(data[ ,avg, interval], desc(avg))[1]
 ```
 ## Imputing missing values
 ```{r}
@@ -58,6 +58,14 @@ Sys.setlocale("LC_TIME", "C")
 head(data[, date := weekdays(date, abbreviate = T)], 5)
 # create string column week with two variable "weekend" and "weekday" by ifelse condition
 head(data[, date := ifelse(date %in% c("Sat", "Sun"), "WeekEnd", "WeekDay")], 5)
-week <- ddply(data, .(interval, date), summarize, steps = mean(steps))
+week <- data[, list(steps = mean(steps)), by = c("interval", "date")]
 xyplot(steps ~ interval | date, week, layout = c(1, 2), type = "l")
+
+#--------------------------------------------------------------
+
+#  ALTERNATIVE
+
+# week <- ddply(data, .(interval, date), summarize, steps = mean(steps))
+
+#--------------------------------------------------------------
 ```
