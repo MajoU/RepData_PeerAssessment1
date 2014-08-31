@@ -11,16 +11,30 @@ data$date <- ymd(data$date)
 ```
 ## What is mean total number of steps taken per day?
 ```{r}
-total_steps <- tapply(data$steps, data$date, sum)
-hist(total_steps, xlab = "Total steps per day", main = "Histogram of the total number of steps taken each day")
+total_steps <- data[, list( sum = sum(steps)), by = date]
+
+# -------------------------------------------------
+# ALTERNATIVE
+
+# total_steps <- tapply(data$steps, data$date, sum)
+# -------------------------------------------------
+
+hist(total_steps$sum, xlab = "Total steps per day", main = "Histogram of the total number of steps taken each day")
 
 # mean and median total number of steps taken per day
-mean(total_steps, na.rm = T)
-median(total_steps, na.rm = T)
+mean(total_steps$sum, na.rm = T)
+median(total_steps$sum, na.rm = T)
 ```
 ## What is the average daily activity pattern?
 ```{r}
 head(data[, avg := mean(steps, na.rm = T), by = interval], 5)
+
+# ----------------------------------------------------------
+# ALTERNATIVE LIKE PLYR ddply
+
+# data <- data[, list(avg = mean(steps, na.rm = T)), by interval]
+# -----------------------------------------------------------
+
 plot(avg ~ interval, data, type = "l", xlab = "Intervals", ylab = "Average number of steps")
 
 # Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -33,17 +47,22 @@ sum(is.na(data))
 
 # Imputing NA's with average on 5-min interval and create new dataset
 head(data[is.na(steps), steps := avg], 5)
-daily_steps <- tapply(data$steps, data$date, sum)
+daily_steps <- data[, list(sum = sum(steps)), by = date]
+
+# ------------------------------------------------
+# daily_steps <- tapply(data$steps, data$date, sum)
+# ------------------------------------------------
+
 # plot the histogram
-hist(daily_steps, xlab = "Total steps per day", main = "Histogram of the total number of steps per day")
+hist(daily_steps$sum, xlab = "Total steps per day", main = "Histogram of the total number of steps per day")
 
 # mean and median total number of steps taken per day don't change significantly
-mean(daily_steps)
-median(daily_steps)
+mean(daily_steps$sum)
+median(daily_steps$sum)
 
 # difference between mean and median from the first and this assignment
-abs(mean(daily_steps) - mean(total_steps, na.rm = T))
-abs(median(daily_steps) - median(total_steps, na.rm = T))
+abs(mean(daily_steps$sum) - mean(total_steps$sum, na.rm = T))
+abs(median(daily_steps$sum) - median(total_steps$sum, na.rm = T))
 ```
 Mean values didn't change as imputation and median change slightly.
 Imputation change the apperance of histogram. The intervals between

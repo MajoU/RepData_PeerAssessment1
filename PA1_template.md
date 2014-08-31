@@ -13,8 +13,15 @@ data$date <- ymd(data$date)
 ## What is mean total number of steps taken per day?
 
 ```r
-total_steps <- tapply(data$steps, data$date, sum)
-hist(total_steps, xlab = "Total steps per day", main = "Histogram of the total number of steps taken each day")
+total_steps <- data[, list( sum = sum(steps)), by = date]
+
+# -------------------------------------------------
+# ALTERNATIVE
+
+# total_steps <- tapply(data$steps, data$date, sum)
+# -------------------------------------------------
+
+hist(total_steps$sum, xlab = "Total steps per day", main = "Histogram of the total number of steps taken each day")
 ```
 
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
@@ -25,7 +32,11 @@ mean(total_steps, na.rm = T)
 ```
 
 ```
-## [1] 10766
+## Warning: argument is not numeric or logical: returning NA
+```
+
+```
+## [1] NA
 ```
 
 ```r
@@ -33,7 +44,7 @@ median(total_steps, na.rm = T)
 ```
 
 ```
-## [1] 10765
+## Error: need numeric data
 ```
 ## What is the average daily activity pattern?
 
@@ -51,6 +62,12 @@ head(data[, avg := mean(steps, na.rm = T), by = interval], 5)
 ```
 
 ```r
+# ----------------------------------------------------------
+# ALTERNATIVE LIKE PLYR ddply
+
+# data <- data[, list(avg = mean(steps, na.rm = T)), by interval]
+# -----------------------------------------------------------
+
 plot(avg ~ interval, data, type = "l", xlab = "Intervals", ylab = "Average number of steps")
 ```
 
@@ -91,16 +108,21 @@ head(data[is.na(steps), steps := avg], 5)
 ```
 
 ```r
-daily_steps <- tapply(data$steps, data$date, sum)
+daily_steps <- data[, list(sum = sum(steps)), by = date]
+
+# ------------------------------------------------
+# daily_steps <- tapply(data$steps, data$date, sum)
+# ------------------------------------------------
+
 # plot the histogram
-hist(daily_steps, xlab = "Total steps per day", main = "Histogram of the total number of steps per day")
+hist(daily_steps$sum, xlab = "Total steps per day", main = "Histogram of the total number of steps per day")
 ```
 
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
 
 ```r
 # mean and median total number of steps taken per day don't change significantly
-mean(daily_steps)
+mean(daily_steps$sum)
 ```
 
 ```
@@ -108,7 +130,7 @@ mean(daily_steps)
 ```
 
 ```r
-median(daily_steps)
+median(daily_steps$sum)
 ```
 
 ```
@@ -117,7 +139,7 @@ median(daily_steps)
 
 ```r
 # difference between mean and median from the first and this assignment
-abs(mean(daily_steps) - mean(total_steps, na.rm = T))
+abs(mean(daily_steps$sum) - mean(total_steps$sum, na.rm = T))
 ```
 
 ```
@@ -125,7 +147,7 @@ abs(mean(daily_steps) - mean(total_steps, na.rm = T))
 ```
 
 ```r
-abs(median(daily_steps) - median(total_steps, na.rm = T))
+abs(median(daily_steps$sum) - median(total_steps$sum, na.rm = T))
 ```
 
 ```
