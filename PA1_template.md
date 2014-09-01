@@ -21,30 +21,26 @@ total_steps <- data[, list( sum = sum(steps)), by = date]
 # total_steps <- tapply(data$steps, data$date, sum)
 # -------------------------------------------------
 
-hist(total_steps$sum, xlab = "Total steps per day", main = "Histogram of the total number of steps taken each day")
+hist(total_steps$sum, cex.lab = 1.4, xlab = "Total steps per day", main = "Histogram of the total number of steps taken each day")
 ```
 
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
 ```r
 # mean and median total number of steps taken per day
-mean(total_steps, na.rm = T)
+mean(total_steps$sum, na.rm = T)
 ```
 
 ```
-## Warning: argument is not numeric or logical: returning NA
-```
-
-```
-## [1] NA
+## [1] 10766
 ```
 
 ```r
-median(total_steps, na.rm = T)
+median(total_steps$sum, na.rm = T)
 ```
 
 ```
-## Error: need numeric data
+## [1] 10765
 ```
 ## What is the average daily activity pattern?
 
@@ -63,24 +59,33 @@ head(data[, avg := mean(steps, na.rm = T), by = interval], 5)
 
 ```r
 # ----------------------------------------------------------
-# ALTERNATIVE LIKE PLYR ddply
+# SIMILAR CODE LIKE PLYR ddply
 
-# data <- data[, list(avg = mean(steps, na.rm = T)), by interval]
+# data <- data[, list(avg = mean(steps, na.rm = T)), by = interval]
 # -----------------------------------------------------------
 
-plot(avg ~ interval, data, type = "l", xlab = "Intervals", ylab = "Average number of steps")
+plot(avg ~ interval, data, type = "l", cex.lab = 1.4, xlab = "Intervals", ylab = "Average number of steps")
 ```
 
 ![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
 
 ```r
 # Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-arrange(data[ ,avg, interval], desc(avg))[1]
+
+data[order(-avg, interval), avg, interval][1]
 ```
 
 ```
 ##    interval   avg
 ## 1:      835 206.2
+```
+
+```r
+# -------------------------------------------------
+#  ALTERNATIVE IN PLYR
+
+#  arrange(data[ ,avg, interval], desc(avg))[1]
+# ------------------------------------------------- 
 ```
 ## Imputing missing values
 
@@ -115,7 +120,7 @@ daily_steps <- data[, list(sum = sum(steps)), by = date]
 # ------------------------------------------------
 
 # plot the histogram
-hist(daily_steps$sum, xlab = "Total steps per day", main = "Histogram of the total number of steps per day")
+hist(daily_steps$sum, cex.lab = 1.4, xlab = "Total steps per day", main = "Histogram of the total number of steps per day")
 ```
 
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
@@ -198,10 +203,17 @@ head(data[, date := ifelse(date %in% c("Sat", "Sun"), "WeekEnd", "WeekDay")], 5)
 ```
 
 ```r
+# summarize steps mean by interval and date - this is plyr like
 week <- data[, list(steps = mean(steps)), by = c("interval", "date")]
+
+# ----------------------------------------------------------------------
 #  ALTERNATIVE
-# week <- ddply(data, .(interval, date), summarize, steps = mean(steps))
-xyplot(steps ~ interval | date, week, layout = c(1, 2), type = "l")
+#  week <- ddply(data, .(interval, date), summarize, steps = mean(steps))
+# ----------------------------------------------------------------------
+
+# create plot
+xyplot(steps ~ interval | date, week, layout = c(1, 2), xlab =
+       list("Intervals", cex = 1.3), ylab = list("Steps", cex = 1.3), type = "l")
 ```
 
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
