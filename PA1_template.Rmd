@@ -86,7 +86,7 @@ head(data[, date := weekdays(date, abbreviate = T)], 5)
 # create string column week with two variable "weekend" and "weekday" by ifelse condition
 head(data[, date := ifelse(date %in% c("Sat", "Sun"), "WeekEnd", "WeekDay")], 5)
 # summarize steps mean by interval and date - this is plyr like
-week <- data[, list(steps = mean(steps)), by = c("interval", "date")]
+week <- data[, list(steps = mean(steps)), by = "interval,date"]
 
 # ----------------------------------------------------------------------
 #  ALTERNATIVE

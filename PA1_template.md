@@ -204,7 +204,7 @@ head(data[, date := ifelse(date %in% c("Sat", "Sun"), "WeekEnd", "WeekDay")], 5)
 
 ```r
 # summarize steps mean by interval and date - this is plyr like
-week <- data[, list(steps = mean(steps)), by = c("interval", "date")]
+week <- data[, list(steps = mean(steps)), by = "interval,date"]
 
 # ----------------------------------------------------------------------
 #  ALTERNATIVE

@@ -378,7 +378,7 @@ head(data[, date := ifelse(date %in% c(&quot;Sat&quot;, &quot;Sun&quot;), &quot;
 </code></pre>
 
 <pre><code class="r"># summarize steps mean by interval and date - this is plyr like
-week &lt;- data[, list(steps = mean(steps)), by = c(&quot;interval&quot;, &quot;date&quot;)]
+week &lt;- data[, list(steps = mean(steps)), by = &quot;interval,date&quot;]
 
 # ----------------------------------------------------------------------
 #  ALTERNATIVE
